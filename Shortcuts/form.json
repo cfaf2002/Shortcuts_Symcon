@@ -100,12 +100,6 @@
                             "value": 1
                         }
                     ]
-                },
-                {
-                    "type": "ValidationTextBox",
-                    "name": "Title",
-                    "caption": "Title in the tile (empty = none)",
-                    "width": "350px"
                 }
             ]
         }

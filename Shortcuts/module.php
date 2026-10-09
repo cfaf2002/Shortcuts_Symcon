@@ -22,7 +22,6 @@ class Shortcuts extends IPSModuleStrict
         parent::Create();
 
         $this->RegisterPropertyString('Shortcuts', '[]');
-        $this->RegisterPropertyString('Title', '');
         $this->RegisterPropertyInteger('Layout', 0);            // 0 = Raster, 1 = Liste
         $this->RegisterPropertyInteger('TileTheme', 0);         // 0 = Symcon-Design, 1 = Dunkel, 2 = Hell
 
@@ -138,7 +137,6 @@ class Shortcuts extends IPSModuleStrict
         return [
             'theme'   => $this->ReadPropertyInteger('TileTheme'),
             'layout'  => $this->ReadPropertyInteger('Layout'),
-            'title'   => $this->ReadPropertyString('Title'),
             'buttons' => $Buttons,
             'text'    => [
                 'empty'       => $this->Translate('No shortcuts yet. Add them in the instance configuration.'),
