@@ -1,0 +1,196 @@
+{
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "Each shortcut becomes a button in the tile. Tapping it opens the object in the visualization: variables and instances as a full-screen tile, categories as a page."
+        },
+        {
+            "type": "List",
+            "name": "Shortcuts",
+            "caption": "Shortcuts",
+            "rowCount": 8,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "caption": "Object",
+                    "name": "ObjectID",
+                    "width": "260px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectObject"
+                    }
+                },
+                {
+                    "caption": "Name (empty = object name)",
+                    "name": "Caption",
+                    "width": "auto",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Icon",
+                    "name": "Icon",
+                    "width": "150px",
+                    "add": "auto",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {
+                                "caption": "Automatic",
+                                "value": "auto"
+                            },
+                            {
+                                "caption": "Lamp",
+                                "value": "bulb"
+                            },
+                            {
+                                "caption": "Shutter",
+                                "value": "shutter"
+                            },
+                            {
+                                "caption": "Heating",
+                                "value": "radiator"
+                            },
+                            {
+                                "caption": "Temperature",
+                                "value": "thermometer"
+                            },
+                            {
+                                "caption": "Window",
+                                "value": "window"
+                            },
+                            {
+                                "caption": "Door",
+                                "value": "door"
+                            },
+                            {
+                                "caption": "Socket",
+                                "value": "plug"
+                            },
+                            {
+                                "caption": "Power",
+                                "value": "power"
+                            },
+                            {
+                                "caption": "Water",
+                                "value": "water"
+                            },
+                            {
+                                "caption": "Camera",
+                                "value": "camera"
+                            },
+                            {
+                                "caption": "Music",
+                                "value": "music"
+                            },
+                            {
+                                "caption": "Car",
+                                "value": "car"
+                            },
+                            {
+                                "caption": "Garden",
+                                "value": "garden"
+                            },
+                            {
+                                "caption": "Alarm",
+                                "value": "alarm"
+                            },
+                            {
+                                "caption": "House",
+                                "value": "house"
+                            },
+                            {
+                                "caption": "Sun",
+                                "value": "sun"
+                            },
+                            {
+                                "caption": "Wind",
+                                "value": "wind"
+                            },
+                            {
+                                "caption": "Star",
+                                "value": "star"
+                            },
+                            {
+                                "caption": "Folder",
+                                "value": "folder"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "caption": "Colour",
+                    "name": "Color",
+                    "width": "90px",
+                    "add": -1,
+                    "edit": {
+                        "type": "SelectColor",
+                        "allowTransparent": true
+                    }
+                },
+                {
+                    "caption": "Show value",
+                    "name": "ShowValue",
+                    "width": "110px",
+                    "add": true,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile",
+            "expanded": true,
+            "items": [
+                {
+                    "type": "Select",
+                    "name": "TileTheme",
+                    "caption": "Tile colour scheme",
+                    "options": [
+                        {
+                            "caption": "Symcon design (visualization colours)",
+                            "value": 0
+                        },
+                        {
+                            "caption": "Dark",
+                            "value": 1
+                        },
+                        {
+                            "caption": "Light",
+                            "value": 2
+                        }
+                    ]
+                },
+                {
+                    "type": "Select",
+                    "name": "Layout",
+                    "caption": "Layout",
+                    "options": [
+                        {
+                            "caption": "Grid",
+                            "value": 0
+                        },
+                        {
+                            "caption": "List",
+                            "value": 1
+                        }
+                    ]
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Title",
+                    "caption": "Title in the tile (empty = none)",
+                    "width": "350px"
+                }
+            ]
+        }
+    ],
+    "actions": [],
+    "status": []
+}

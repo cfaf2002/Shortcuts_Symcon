@@ -1,0 +1,12 @@
+{
+    "id": "{BAAF520F-8B54-474E-A472-33897EF1C3FE}",
+    "name": "Shortcuts",
+    "type": 3,
+    "vendor": "Armin Frohwerk",
+    "aliases": [],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [],
+    "prefix": "SHORTCUTS",
+    "url": "https://github.com/cfaf2002/Shortcuts_Symcon/blob/main/README.md"
+}

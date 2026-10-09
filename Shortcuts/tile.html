@@ -1,0 +1,230 @@
+<!--
+    Kachel für das Modul "Shortcuts" (IP-Symcon HTML-SDK)
+    Copyright (c) 2026 Armin Frohwerk · MIT-Lizenz (siehe LICENSE)
+    SPDX-License-Identifier: MIT
+
+    Knöpfe als Raster oder Liste; Antippen ruft openObject(ID) der Visualisierung auf (ab Symcon 8.2).
+    Daten kommen nur über handleMessage, Texte werden per textContent gesetzt, Symbole sind eingebettete SVG-Pfade.
+    Gestaltung nach STYLEGUIDE.md (Kachel-Grundlage, Farbschema über applyTheme).
+-->
+<style>
+    /* ===== Hausstil cfaf2002 · Kachel-Grundlage v1 (siehe STYLEGUIDE.md) =====
+       Farbschema 0 = Symcon-Design (Farben der Visualisierung), 1 = Dunkel, 2 = Hell.
+       Modulspezifisch ist nur --brand (Akzent der festen Farbschemas). */
+    :root {
+        --brand: #2f8fdd;
+        --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        --fg: var(--content-color, #eef3f7);
+        --accent: var(--accent-color, var(--brand));
+        --on-accent: #ffffff;
+        --muted: color-mix(in srgb, var(--fg) 65%, transparent);
+        --faint: color-mix(in srgb, var(--fg) 40%, transparent);
+        --line: color-mix(in srgb, var(--fg) 15%, transparent);
+        --surface: color-mix(in srgb, var(--fg) 7%, transparent);
+        --surface-hover: color-mix(in srgb, var(--fg) 12%, transparent);
+        --popup: var(--card-color, #232a33);
+        --ok: #34b36b;
+        --warn: #e2a63b;
+        --bad: #e5484d;
+        --info: #4b8ef0;
+        --off: #8796a5;
+        --radius-l: 14px;
+        --radius: 12px;
+        --radius-s: 8px;
+        --pill: 999px;
+        --gap: 8px;
+    }
+    html.theme-dark  { --fg: #eef3f7; --accent: var(--brand); --tile-bg: #1b2530; --popup: #232d39; }
+    html.theme-light { --fg: #1d2b36; --accent: var(--brand); --tile-bg: #e9eef3; --popup: #ffffff; }
+    html.theme-dark body, html.theme-light body { background: var(--tile-bg); }
+    html, body { font-family: var(--font); color: var(--fg); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+    /* ===== Ende Kachel-Grundlage ===== */
+
+    html, body { margin: 0; height: 100%; }
+    .sz { box-sizing: border-box; height: 100%; overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 10px; font-size: 15px; }
+    .sz-titel { font-size: 17px; font-weight: 600; padding: 2px 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sz-titel:empty { display: none; }
+
+    .sz-knoepfe { display: grid; gap: var(--gap); grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
+    .sz.liste .sz-knoepfe { grid-template-columns: 1fr; gap: 6px; }
+
+    .knopf { all: unset; box-sizing: border-box; cursor: pointer; user-select: none; color: var(--fg); background: var(--surface);
+             border: 1px solid transparent; border-radius: var(--radius-l); padding: 12px 10px; min-height: 104px;
+             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center;
+             transition: background .15s, border-color .15s, transform .1s; }
+    .knopf:hover { background: var(--surface-hover); border-color: var(--line); }
+    .knopf:active { transform: scale(.97); }
+    .knopf:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .symbol { width: 40px; height: 40px; flex: none; border-radius: var(--radius); background: var(--knopf-farbe, var(--accent)); color: var(--on-accent);
+              display: flex; align-items: center; justify-content: center; }
+    .symbol svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .text { min-width: 0; max-width: 100%; display: flex; flex-direction: column; gap: 2px; }
+    .name { font-weight: 600; font-size: 14px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-word; }
+    .wert { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wert:empty { display: none; }
+    .pfeil { display: none; color: var(--faint); }
+    .pfeil svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    .sz.liste .knopf { flex-direction: row; justify-content: flex-start; text-align: left; min-height: 52px; padding: 6px 12px 6px 6px; border-radius: var(--radius); gap: 12px; }
+    .sz.liste .symbol { width: 38px; height: 38px; border-radius: var(--radius-s); }
+    .sz.liste .text { flex: 1; flex-direction: row; align-items: center; gap: 10px; }
+    .sz.liste .name { flex: 1; -webkit-line-clamp: 1; }
+    .sz.liste .pfeil { display: block; }
+
+    .sz-leer { padding: 24px 8px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: var(--radius); }
+    .sz-meldung { font-size: 12px; color: var(--muted); min-height: 14px; text-align: center; }
+    .sz-meldung:empty { display: none; }
+</style>
+
+<div class="sz" id="sz" lang="de">
+    <div class="sz-titel" id="sz-titel"></div>
+    <div class="sz-knoepfe" id="sz-knoepfe"></div>
+    <div class="sz-leer" id="sz-leer" hidden></div>
+    <div class="sz-meldung" id="sz-meldung" role="status"></div>
+</div>
+
+<script>
+    // Hausstil: Farbschema der Kachel (0 = Symcon-Design, 1 = Dunkel, 2 = Hell)
+    function applyTheme(theme) {
+        var root = document.documentElement;
+        root.classList.toggle('theme-dark', theme === 1);
+        root.classList.toggle('theme-light', theme === 2);
+    }
+
+    var SYMBOLE = {
+        bulb: ['M9 18h6', 'M10 22h4', 'M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z'],
+        shutter: ['M4 3h16v18H4z', 'M4 7h16', 'M4 11h16', 'M4 15h16'],
+        radiator: ['M6 5v14', 'M10 5v14', 'M14 5v14', 'M18 5v14', 'M4 8h16', 'M4 16h16'],
+        thermometer: ['M14 14.8V4.5a2.5 2.5 0 0 0-5 0v10.3a4.5 4.5 0 1 0 5 0z'],
+        window: ['M4 3h16v18H4z', 'M12 3v18', 'M4 12h16'],
+        door: ['M6 21V3h12v18', 'M3 21h18', 'M14.5 12h.01'],
+        plug: ['M9 2v6', 'M15 2v6', 'M6 8h12v4a6 6 0 0 1-12 0z', 'M12 18v4'],
+        power: ['M12 2v10', 'M18.4 6.6a9 9 0 1 1-12.8 0'],
+        water: ['M12 2.7l5.7 5.7a8 8 0 1 1-11.4 0z'],
+        camera: ['M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z', 'M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z'],
+        music: ['M9 18V5l12-2v13', 'M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'M18 19a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'],
+        car: ['M5 17h14v-5l-2-5H7l-2 5z', 'M5 12h14', 'M7 17v2', 'M17 17v2'],
+        garden: ['M12 22V12', 'M12 12C12 7 8 4 3 4c0 5 4 8 9 8z', 'M12 14c0-4 3-7 8-7 0 4-3 7-8 7z'],
+        alarm: ['M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9', 'M13.7 21a2 2 0 0 1-3.4 0'],
+        house: ['M3 10l9-7 9 7v11H3z', 'M9 21v-7h6v7'],
+        sun: ['M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z', 'M12 2v2', 'M12 20v2', 'M4.9 4.9l1.4 1.4', 'M17.7 17.7l1.4 1.4', 'M2 12h2', 'M20 12h2', 'M4.9 19.1l1.4-1.4', 'M17.7 6.3l1.4-1.4'],
+        wind: ['M9.6 4.6A2 2 0 1 1 11 8H2', 'M12.6 19.4A2 2 0 1 0 14 16H2', 'M17.5 8a2.5 2.5 0 1 1 2 4H2'],
+        star: ['M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z'],
+        folder: ['M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z'],
+        chevron: ['M9 18l6-6-6-6']
+    };
+
+    var sz = { buttons: [], text: {} };
+    var werte = {};
+
+    function svg(name) {
+        var ns = 'http://www.w3.org/2000/svg';
+        var s = document.createElementNS(ns, 'svg');
+        s.setAttribute('viewBox', '0 0 24 24');
+        s.setAttribute('aria-hidden', 'true');
+        (SYMBOLE[name] || SYMBOLE.star).forEach(function (d) {
+            var p = document.createElementNS(ns, 'path');
+            p.setAttribute('d', d);
+            s.appendChild(p);
+        });
+        return s;
+    }
+
+    function el(tag, cls) {
+        var e = document.createElement(tag);
+        if (cls) e.className = cls;
+        return e;
+    }
+
+    function meldung(text) {
+        var m = document.getElementById('sz-meldung');
+        m.textContent = text;
+        clearTimeout(meldung.t);
+        meldung.t = setTimeout(function () { m.textContent = ''; }, 5000);
+    }
+
+    function springen(id) {
+        if (typeof openObject === 'function') {
+            openObject(id);
+        } else {
+            meldung(sz.text.unsupported || '');
+        }
+    }
+
+    function handleMessage(data) {
+        var d;
+        try {
+            d = (typeof data === 'string') ? JSON.parse(data) : data;
+        } catch (e) {
+            return;
+        }
+        if (!d || typeof d !== 'object') return;
+        if (d.values) {
+            Object.keys(d.values).forEach(function (id) { werte[id] = d.values[id]; });
+            werteZeigen();
+            return;
+        }
+        if (typeof d.theme === 'number') applyTheme(d.theme);
+        if (d.buttons) {
+            sz = d;
+            werte = {};
+            sz.buttons.forEach(function (b) { werte[b.id] = b.value; });
+            zeichnen();
+        }
+    }
+
+    function zeichnen() {
+        var root = document.getElementById('sz');
+        root.classList.toggle('liste', sz.layout === 1);
+        document.getElementById('sz-titel').textContent = sz.title || '';
+
+        var leer = document.getElementById('sz-leer');
+        leer.textContent = (sz.text && sz.text.empty) || '';
+        leer.hidden = sz.buttons.length > 0;
+
+        var box = document.getElementById('sz-knoepfe');
+        box.textContent = '';
+        sz.buttons.forEach(function (b) {
+            var k = el('button', 'knopf');
+            k.type = 'button';
+            k.dataset.id = b.id;
+            k.onclick = function () { springen(b.id); };
+
+            var sym = el('span', 'symbol');
+            if (b.color) sym.style.setProperty('--knopf-farbe', b.color);
+            sym.appendChild(svg(b.icon));
+
+            var text = el('span', 'text');
+            var name = el('span', 'name');
+            name.textContent = b.name;
+            var wert = el('span', 'wert');
+            text.appendChild(name);
+            text.appendChild(wert);
+
+            var pfeil = el('span', 'pfeil');
+            pfeil.appendChild(svg('chevron'));
+
+            k.appendChild(sym);
+            k.appendChild(text);
+            k.appendChild(pfeil);
+            box.appendChild(k);
+        });
+        werteZeigen();
+    }
+
+    function werteZeigen() {
+        var knoepfe = document.querySelectorAll('#sz-knoepfe .knopf');
+        for (var i = 0; i < knoepfe.length; i++) {
+            var k = knoepfe[i];
+            var w = werte[k.dataset.id];
+            var text = (w === null || w === undefined) ? '' : String(w);
+            k.querySelector('.wert').textContent = text;
+            k.setAttribute('aria-label', k.querySelector('.name').textContent + (text ? ', ' + text : ''));
+        }
+    }
+</script>
