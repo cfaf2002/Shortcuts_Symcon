@@ -2,7 +2,7 @@
     "elements": [
         {
             "type": "Label",
-            "caption": "Each shortcut becomes a button in the tile. Tapping it opens the object in the visualization: variables and instances as a full-screen tile, categories as a page."
+            "caption": "Each shortcut becomes a button in the tile. Tapping it opens the object in the visualization: variables and instances as a full-screen tile, categories as a page. Icon: own image before Symcon icon before the object's own icon."
         },
         {
             "type": "List",
@@ -39,6 +39,16 @@
                     "edit": {
                         "type": "SelectIcon",
                         "caption": "Icon"
+                    }
+                },
+                {
+                    "caption": "Own image (optional)",
+                    "name": "Image",
+                    "width": "200px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectMedia",
+                        "caption": "Own image (optional)"
                     }
                 },
                 {
@@ -98,6 +108,24 @@
                         {
                             "caption": "List",
                             "value": 1
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectMedia",
+                            "name": "TileBackground",
+                            "caption": "Own background image (optional)"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "TileBackgroundDim",
+                            "caption": "Darken",
+                            "suffix": "%",
+                            "minimum": 0,
+                            "maximum": 90
                         }
                     ]
                 }

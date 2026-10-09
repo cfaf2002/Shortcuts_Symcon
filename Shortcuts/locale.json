@@ -3,7 +3,8 @@
         "de": {
             "Colour": "Farbe",
             "Dark": "Dunkel",
-            "Each shortcut becomes a button in the tile. Tapping it opens the object in the visualization: variables and instances as a full-screen tile, categories as a page.": "Jeder Schnellzugriff wird ein Knopf in der Kachel. Antippen öffnet das Objekt in der Visualisierung: Variablen und Instanzen als Vollbild-Kachel, Kategorien als Seite.",
+            "Darken": "Abdunkeln",
+            "Each shortcut becomes a button in the tile. Tapping it opens the object in the visualization: variables and instances as a full-screen tile, categories as a page. Icon: own image before Symcon icon before the object's own icon.": "Jeder Schnellzugriff wird ein Knopf in der Kachel. Antippen öffnet das Objekt in der Visualisierung: Variablen und Instanzen als Vollbild-Kachel, Kategorien als Seite. Symbol: eigenes Bild vor Symcon-Symbol vor dem Symbol des Objekts.",
             "Grid": "Raster",
             "Icon": "Symbol",
             "Icon (empty = icon of the object)": "Symbol (leer = Symbol des Objekts)",
@@ -14,6 +15,8 @@
             "Name (empty = object name)": "Name (leer = Objektname)",
             "No shortcuts yet. Add them in the instance configuration.": "Noch keine Schnellzugriffe. In der Instanz-Konfiguration hinzufügen.",
             "Object": "Objekt",
+            "Own background image (optional)": "Eigenes Hintergrundbild (optional)",
+            "Own image (optional)": "Eigenes Bild (optional)",
             "Shortcuts": "Schnellzugriffe",
             "Show value": "Wert zeigen",
             "Symcon design (visualization colours)": "Symcon-Design (Farben der Visualisierung)",

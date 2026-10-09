@@ -24,6 +24,8 @@ class Shortcuts extends IPSModuleStrict
         $this->RegisterPropertyString('Shortcuts', '[]');
         $this->RegisterPropertyInteger('Layout', 0);            // 0 = Raster, 1 = Liste
         $this->RegisterPropertyInteger('TileTheme', 0);         // 0 = Symcon-Design, 1 = Dunkel, 2 = Hell
+        $this->RegisterPropertyInteger('TileBackground', 0);    // Medienobjekt (Bild), 0 = keins
+        $this->RegisterPropertyInteger('TileBackgroundDim', 30);
 
         $this->RegisterAttributeString('Watched', '[]');
     }
@@ -91,6 +93,7 @@ class Shortcuts extends IPSModuleStrict
                 'id'        => $ID,
                 'caption'   => trim((string) ($Row['Caption'] ?? '')),
                 'icon'      => preg_match('/^[a-z0-9-]{1,64}$/i', $Icon) ? $Icon : '',
+                'image'     => (int) ($Row['Image'] ?? 0),
                 'color'     => (int) ($Row['Color'] ?? -1),
                 'showValue' => (bool) ($Row['ShowValue'] ?? true)
             ];
@@ -130,6 +133,7 @@ class Shortcuts extends IPSModuleStrict
                 'name'  => $S['caption'] !== '' ? $S['caption'] : $Object['ObjectName'],
                 'icon'  => $S['icon'] !== '' ? $S['icon'] : $this->ObjectIcon($S['id'], $Object),
                 'svg'   => $this->AutoIcon($S['id'], $Object['ObjectType']),
+                'image' => $S['image'] > 0 ? $this->MediaDataUri($S['image'], 128, true) : null,
                 'color' => $S['color'] >= 0 ? sprintf('#%06X', $S['color'] & 0xFFFFFF) : '',
                 'value' => $S['showValue'] ? $this->Value($S['id']) : null
             ];
@@ -138,6 +142,8 @@ class Shortcuts extends IPSModuleStrict
             'theme'   => $this->ReadPropertyInteger('TileTheme'),
             'layout'  => $this->ReadPropertyInteger('Layout'),
             'buttons' => $Buttons,
+            'background' => $this->MediaDataUri($this->ReadPropertyInteger('TileBackground'), 900, false),
+            'dim'     => max(0, min(90, $this->ReadPropertyInteger('TileBackgroundDim'))),
             'text'    => [
                 'empty'       => $this->Translate('No shortcuts yet. Add them in the instance configuration.'),
                 'unsupported' => $this->Translate('Jumping to objects requires Symcon 8.2 or newer.')
@@ -174,6 +180,76 @@ class Shortcuts extends IPSModuleStrict
         } catch (Throwable $e) {
             return null;
         }
+    }
+
+    /**
+     * Bild aus einem Medienobjekt als data-URI, mit GD auf $Max Pixel verkleinert
+     * (Symbole als PNG mit Transparenz, Hintergrund als JPEG). Zwischengespeichert, bis sich das Medium ändert.
+     */
+    private function MediaDataUri(int $MediaID, int $Max, bool $Png): ?string
+    {
+        if ($MediaID <= 0 || !IPS_MediaExists($MediaID)) {
+            return null;
+        }
+        $Media = IPS_GetMedia($MediaID);
+        $Key = $MediaID . ':' . $Max . ':' . ($Media['MediaUpdated'] ?? 0) . ':' . ($Media['MediaSize'] ?? 0);
+        $Cache = json_decode($this->GetBuffer('Media'), true);
+        $Cache = is_array($Cache) ? $Cache : [];
+        if (array_key_exists($Key, $Cache)) {
+            return $Cache[$Key];
+        }
+        $Uri = $this->BuildDataUri($MediaID, $Max, $Png);
+        // nur die gerade genutzten Bilder behalten
+        $Cache = array_filter($Cache, fn (string $K): bool => !str_starts_with($K, $MediaID . ':' . $Max . ':'), ARRAY_FILTER_USE_KEY);
+        $Cache[$Key] = $Uri;
+        $this->SetBuffer('Media', (string) json_encode($Cache));
+        return $Uri;
+    }
+
+    private function BuildDataUri(int $MediaID, int $Max, bool $Png): ?string
+    {
+        $Raw = base64_decode((string) IPS_GetMediaContent($MediaID), true);
+        if ($Raw === false || $Raw === '') {
+            return null;
+        }
+        // SVG unverändert übernehmen (klein, skaliert selbst); als <img> ausgeführt laufen darin keine Skripte
+        if (str_contains(substr($Raw, 0, 512), '<svg')) {
+            return strlen($Raw) <= 200000 ? 'data:image/svg+xml;base64,' . base64_encode($Raw) : null;
+        }
+        // Riesige Bilder nicht dekodieren (Speicherschutz): höchstens 40 Megapixel
+        $Info = @getimagesizefromstring($Raw);
+        if ($Info === false || $Info[0] * $Info[1] > 40000000) {
+            $this->SendDebug('Bild', 'Medium ' . $MediaID . ': kein Bild oder zu groß (max. 40 Megapixel).', 0);
+            return null;
+        }
+        if (function_exists('imagecreatefromstring')) {
+            $Img = @imagecreatefromstring($Raw);
+            if ($Img !== false) {
+                $W = imagesx($Img);
+                $H = imagesy($Img);
+                $Scale = min(1.0, $Max / max($W, $H));
+                if ($Scale < 1.0) {
+                    $Small = imagecreatetruecolor(max(1, (int) round($W * $Scale)), max(1, (int) round($H * $Scale)));
+                    if ($Png) {
+                        imagealphablending($Small, false);
+                        imagesavealpha($Small, true);
+                    }
+                    imagecopyresampled($Small, $Img, 0, 0, 0, 0, imagesx($Small), imagesy($Small), $W, $H);
+                    $Img = $Small;
+                } elseif ($Png) {
+                    imagesavealpha($Img, true);
+                }
+                ob_start();
+                $Png ? imagepng($Img, null, 9) : imagejpeg($Img, null, 80);
+                return 'data:image/' . ($Png ? 'png' : 'jpeg') . ';base64,' . base64_encode((string) ob_get_clean());
+            }
+        }
+        // ohne GD: Original nur, wenn es klein genug ist
+        if (strlen($Raw) > ($Png ? 200000 : 1500000)) {
+            $this->SendDebug('Bild', 'Medium ' . $MediaID . ': zu groß und GD nicht verfügbar.', 0);
+            return null;
+        }
+        return 'data:' . ($Info['mime'] ?? 'image/png') . ';base64,' . base64_encode($Raw);
     }
 
     /**

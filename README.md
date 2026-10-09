@@ -2,7 +2,7 @@
 
 [![IP-Symcon ab 8.2](https://img.shields.io/badge/IP--Symcon-ab_8.2-0b6fb3.svg)](https://www.symcon.de)
 [![Optimiert für Symcon 9.0](https://img.shields.io/badge/optimiert_f%C3%BCr-Symcon_9.0-0b6fb3.svg)](https://www.symcon.de/de/service/dokumentation/installation/migrationen/v81-v90-q1-2026/)
-[![Modul-Version 1.2 (Build 3)](https://img.shields.io/badge/Modul--Version-1.2_(Build_3)-informational.svg)](library.json)
+[![Modul-Version 1.3 (Build 4)](https://img.shields.io/badge/Modul--Version-1.3_(Build_4)-informational.svg)](library.json)
 [![Tests](https://github.com/cfaf2002/Shortcuts_Symcon/actions/workflows/tests.yml/badge.svg)](https://github.com/cfaf2002/Shortcuts_Symcon/actions/workflows/tests.yml)
 [![PHP 8.3 und 8.5](https://img.shields.io/badge/PHP-8.3_%7C_8.5-777bb4.svg?logo=php&logoColor=white)](https://www.php.net)
 [![SDK: IPSModuleStrict](https://img.shields.io/badge/SDK-IPSModuleStrict-success.svg)](https://www.symcon.de/de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/module/)
@@ -23,7 +23,9 @@ Eine Kachel mit frei konfigurierbaren Knöpfen, die direkt zu einer Variable, In
 ## Funktionsumfang
 
 - Beliebig viele Knöpfe, Reihenfolge im Formular verschiebbar.
-- Je Knopf: Objekt, Name (leer = Objektname), Symbol aus der Symbolauswahl von Symcon (leer = Symbol des Objekts), Farbe, Wert anzeigen.
+- Je Knopf: Objekt, Name (leer = Objektname), Symbol aus der Symbolauswahl von Symcon (leer = Symbol des Objekts), eigenes Bild als Symbol, Farbe, Wert anzeigen.
+- Reihenfolge beim Symbol: eigenes Bild, dann Symcon-Symbol, dann Symbol des Objekts. Ein eigenes Bild ohne Farbe füllt das Symbolfeld, mit Farbe sitzt es im farbigen Feld.
+- Eigenes Hintergrundbild für die Kachel, einstellbar abgedunkelt; darauf ist die Schrift immer hell.
 - Lädt ein Symbol in der Kachel nicht, erscheint ein eingebautes Ersatzsymbol nach Objekttyp.
 - Antippen öffnet das Objekt in der Visualisierung: Variablen und Instanzen als Vollbild-Kachel, Kategorien als Seite. Verknüpfungen werden auf ihr Ziel aufgelöst.
 - Werte von Variablen erscheinen formatiert im Knopf und werden bei jeder Änderung aktualisiert (nur geänderte Werte werden gesendet).
@@ -43,7 +45,9 @@ Eine Kachel mit frei konfigurierbaren Knöpfen, die direkt zu einer Variable, In
 ## Einrichtung
 
 1. In der Liste „Schnellzugriffe“ mit *Hinzufügen* je Knopf ein Objekt wählen, bei Bedarf Name, Symbol und Farbe setzen.
-2. Unter „Kachel“ Farbschema und Darstellung wählen. Die Überschrift der Kachel ist der Name der Instanz.
+2. Unter „Kachel“ Farbschema, Darstellung und bei Bedarf ein Hintergrundbild wählen. Die Überschrift der Kachel ist der Name der Instanz.
+
+Eigene Bilder (für Symbole und Hintergrund) legst du in Symcon als **Medienobjekt** vom Typ Bild an, zum Beispiel per Rechtsklick im Objektbaum → *Objekt hinzufügen → Medien → Bild* und Datei hochladen. PNG mit Transparenz oder SVG eignen sich am besten für Symbole. Das Modul verkleinert Symbole auf 128 px und Hintergründe auf 900 px.
 3. Die Instanz (oder eine Verknüpfung darauf) in der Kachel-Visualisierung einblenden.
 
 Tipp: Bei Variablen, die in einer Instanz liegen, heißt das Objekt oft nur „Status“ oder „Zustand“ – dann lohnt sich ein eigener Name wie „Wohnzimmer Licht“.
@@ -54,6 +58,8 @@ Tipp: Bei Variablen, die in einer Instanz liegen, heißt das Objekt oft nur „S
 | :-- | :-- |
 | Farbschema der Kachel | Symcon-Design (Farben der Visualisierung), Dunkel, Hell |
 | Darstellung | Raster (Knöpfe nebeneinander) oder Liste (eine Zeile je Knopf) |
+| Eigenes Hintergrundbild | Medienobjekt (Bild), leer = keins |
+| Abdunkeln | 0–90 % (Standard 30 %), damit die Schrift auf dem Bild lesbar bleibt |
 
 Ohne gewählte Farbe nimmt ein Knopf die Akzentfarbe (Symcon-Design) bzw. die Markenfarbe des Moduls (Dunkel/Hell).
 
@@ -68,6 +74,7 @@ Keine.
 ## Sicherheit und Geschwindigkeit
 
 - Die Kachel bekommt nur ID, Name, Symbol, Farbe und formatierten Wert der konfigurierten Objekte; alle Texte werden per `textContent` gesetzt.
+- Bilder gehen als data-URI in die Kachel; die Kachel setzt nur URIs der Form `data:image/…;base64,…`. Bilder über 40 Megapixel werden nicht geöffnet, verkleinerte Bilder werden zwischengespeichert, bis sich das Medienobjekt ändert.
 - Das Springen übernimmt die Visualisierung selbst (`openObject`) – das Modul schaltet nichts.
 - Werte werden ereignisgesteuert (`VM_UPDATE`) und nur bei Änderung an die Kachel geschickt.
 
@@ -83,6 +90,7 @@ php tests/stubs.php ../SymconStubs
 
 | Version | Build | Datum | Beschreibung |
 | :-- | --: | :-- | :-- |
+| 1.3 | 4 | 09.10.2026 | Eigene Bilder als Symbole und eigenes Hintergrundbild (mit Abdunkeln) |
 | 1.2 | 3 | 09.10.2026 | Eigene Überschrift entfernt: die Visualisierung zeigt schon den Instanznamen |
 | 1.1 | 2 | 09.10.2026 | Symbole aus der Symbolauswahl von Symcon (leer = Symbol des Objekts); Knöpfe beginnen unter dem Kacheltitel statt ihn zu überdecken |
 | 1.0 | 1 | 09.10.2026 | Erste Version: Sprung-Knöpfe mit Symbol, Farbe und Wert, Raster oder Liste |
