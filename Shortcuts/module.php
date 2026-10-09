@@ -12,9 +12,10 @@ declare(strict_types=1);
  */
 class Shortcuts extends IPSModuleStrict
 {
-    // Symbole der Kachel (Schlüssel = Name in tile.html)
-    private const SYMBOLE = ['auto', 'bulb', 'shutter', 'radiator', 'thermometer', 'window', 'door', 'plug', 'power',
-        'water', 'camera', 'music', 'car', 'garden', 'alarm', 'house', 'sun', 'wind', 'star', 'folder'];
+    // Werte aus Version 1.0 auf die passenden Symcon-Symbole (Font Awesome) abbilden
+    private const ALT = ['auto' => '', 'bulb' => 'lightbulb', 'shutter' => 'blinds', 'radiator' => 'heat',
+        'thermometer' => 'temperature-half', 'window' => 'window-frame', 'power' => 'power-off', 'garden' => 'seedling',
+        'alarm' => 'bell'];
 
     public function Create(): void
     {
@@ -85,11 +86,12 @@ class Shortcuts extends IPSModuleStrict
                 $this->SendDebug('Schnellzugriff', 'Objekt ' . ($Row['ObjectID'] ?? 0) . ' existiert nicht – übersprungen', 0);
                 continue;
             }
-            $Icon = (string) ($Row['Icon'] ?? 'auto');
+            $Icon = trim((string) ($Row['Icon'] ?? ''));
+            $Icon = self::ALT[$Icon] ?? $Icon;
             $Result[] = [
                 'id'        => $ID,
                 'caption'   => trim((string) ($Row['Caption'] ?? '')),
-                'icon'      => in_array($Icon, self::SYMBOLE, true) ? $Icon : 'auto',
+                'icon'      => preg_match('/^[a-z0-9-]{1,64}$/i', $Icon) ? $Icon : '',
                 'color'     => (int) ($Row['Color'] ?? -1),
                 'showValue' => (bool) ($Row['ShowValue'] ?? true)
             ];
@@ -127,7 +129,8 @@ class Shortcuts extends IPSModuleStrict
             $Buttons[] = [
                 'id'    => $S['id'],
                 'name'  => $S['caption'] !== '' ? $S['caption'] : $Object['ObjectName'],
-                'icon'  => $S['icon'] !== 'auto' ? $S['icon'] : $this->AutoIcon($S['id'], $Object['ObjectType']),
+                'icon'  => $S['icon'] !== '' ? $S['icon'] : $this->ObjectIcon($S['id'], $Object),
+                'svg'   => $this->AutoIcon($S['id'], $Object['ObjectType']),
                 'color' => $S['color'] >= 0 ? sprintf('#%06X', $S['color'] & 0xFFFFFF) : '',
                 'value' => $S['showValue'] ? $this->Value($S['id']) : null
             ];
@@ -175,6 +178,22 @@ class Shortcuts extends IPSModuleStrict
         }
     }
 
+    /**
+     * Symbol des Objekts selbst: Objekt-Symbol, sonst Symbol der Darstellung der Variable.
+     */
+    private function ObjectIcon(int $ID, array $Object): string
+    {
+        $Icon = (string) ($Object['ObjectIcon'] ?? '');
+        if ($Icon === '' && IPS_VariableExists($ID)) {
+            $Presentation = IPS_GetVariable($ID)['VariableCustomPresentation'] ?? [];
+            $Icon = is_array($Presentation) ? (string) ($Presentation['ICON'] ?? '') : '';
+        }
+        return preg_match('/^[a-z0-9-]{1,64}$/i', $Icon) ? $Icon : '';
+    }
+
+    /**
+     * Eingebautes Ersatzsymbol nach Objekttyp.
+     */
     private function AutoIcon(int $ID, int $Type): string
     {
         switch ($Type) {

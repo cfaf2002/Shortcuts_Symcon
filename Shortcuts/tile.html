@@ -4,9 +4,11 @@
     SPDX-License-Identifier: MIT
 
     Knöpfe als Raster oder Liste; Antippen ruft openObject(ID) der Visualisierung auf (ab Symcon 8.2).
-    Daten kommen nur über handleMessage, Texte werden per textContent gesetzt, Symbole sind eingebettete SVG-Pfade.
+    Daten kommen nur über handleMessage, Texte werden per textContent gesetzt.
+    Symbole: die der Visualisierung (/icons.js, Font Awesome); lädt eines nicht, gibt es ein eingebettetes SVG als Ersatz.
     Gestaltung nach STYLEGUIDE.md (Kachel-Grundlage, Farbschema über applyTheme).
 -->
+<script src="/icons.js"></script>
 <style>
     /* ===== Hausstil cfaf2002 · Kachel-Grundlage v1 (siehe STYLEGUIDE.md) =====
        Farbschema 0 = Symcon-Design (Farben der Visualisierung), 1 = Dunkel, 2 = Hell.
@@ -45,7 +47,8 @@
     /* ===== Ende Kachel-Grundlage ===== */
 
     html, body { margin: 0; height: 100%; }
-    .sz { box-sizing: border-box; height: 100%; overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 10px; font-size: 15px; }
+    /* oben Platz für den Kacheltitel, den die Visualisierung selbst einblendet */
+    .sz { box-sizing: border-box; height: 100%; overflow-y: auto; padding: 44px 6px 6px; display: flex; flex-direction: column; gap: 10px; font-size: 15px; }
     .sz-titel { font-size: 17px; font-weight: 600; padding: 2px 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sz-titel:empty { display: none; }
 
@@ -62,7 +65,9 @@
 
     .symbol { width: 40px; height: 40px; flex: none; border-radius: var(--radius); background: var(--knopf-farbe, var(--accent)); color: var(--on-accent);
               display: flex; align-items: center; justify-content: center; }
-    .symbol svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .symbol i { font-size: 21px; line-height: 1; }
+    .symbol svg.svg-inline--fa { height: 21px; width: auto; }
+    .symbol svg.eigen { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     .text { min-width: 0; max-width: 100%; display: flex; flex-direction: column; gap: 2px; }
     .name { font-weight: 600; font-size: 14px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-word; }
     .wert { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -126,6 +131,7 @@
         var ns = 'http://www.w3.org/2000/svg';
         var s = document.createElementNS(ns, 'svg');
         s.setAttribute('viewBox', '0 0 24 24');
+        s.setAttribute('class', 'eigen');
         s.setAttribute('aria-hidden', 'true');
         (SYMBOLE[name] || SYMBOLE.star).forEach(function (d) {
             var p = document.createElementNS(ns, 'path');
@@ -133,6 +139,38 @@
             s.appendChild(p);
         });
         return s;
+    }
+
+    // Symcon-Symbol (Font Awesome) einsetzen; erst Light, dann eigene Symbole (Kit), sonst eingebettetes SVG
+    function symbol(sym, b) {
+        if (!b.icon) {
+            sym.appendChild(svg(b.svg));
+            return;
+        }
+        var stile = ['fa-light', 'fa-kit'];
+        function versuch(n) {
+            sym.textContent = '';
+            if (n >= stile.length) {
+                sym.appendChild(svg(b.svg));
+                return;
+            }
+            var i = document.createElement('i');
+            i.className = stile[n] + ' fa-' + b.icon;
+            i.setAttribute('aria-hidden', 'true');
+            sym.appendChild(i);
+            setTimeout(function () {
+                if (sym.isConnected && !geladen(sym)) versuch(n + 1);
+            }, 1200);
+        }
+        versuch(0);
+    }
+
+    function geladen(sym) {
+        if (sym.querySelector('svg.svg-inline--fa')) return true;
+        var i = sym.querySelector('i');
+        if (!i || i.getBoundingClientRect().width === 0) return false;
+        var c = getComputedStyle(i, '::before').content;
+        return !!c && c !== 'none' && c !== 'normal' && c !== '""';
     }
 
     function el(tag, cls) {
@@ -197,7 +235,7 @@
 
             var sym = el('span', 'symbol');
             if (b.color) sym.style.setProperty('--knopf-farbe', b.color);
-            sym.appendChild(svg(b.icon));
+            symbol(sym, b);
 
             var text = el('span', 'text');
             var name = el('span', 'name');

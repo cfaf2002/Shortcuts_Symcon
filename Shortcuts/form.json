@@ -32,94 +32,13 @@
                     }
                 },
                 {
-                    "caption": "Icon",
+                    "caption": "Icon (empty = icon of the object)",
                     "name": "Icon",
-                    "width": "150px",
-                    "add": "auto",
+                    "width": "200px",
+                    "add": "",
                     "edit": {
-                        "type": "Select",
-                        "options": [
-                            {
-                                "caption": "Automatic",
-                                "value": "auto"
-                            },
-                            {
-                                "caption": "Lamp",
-                                "value": "bulb"
-                            },
-                            {
-                                "caption": "Shutter",
-                                "value": "shutter"
-                            },
-                            {
-                                "caption": "Heating",
-                                "value": "radiator"
-                            },
-                            {
-                                "caption": "Temperature",
-                                "value": "thermometer"
-                            },
-                            {
-                                "caption": "Window",
-                                "value": "window"
-                            },
-                            {
-                                "caption": "Door",
-                                "value": "door"
-                            },
-                            {
-                                "caption": "Socket",
-                                "value": "plug"
-                            },
-                            {
-                                "caption": "Power",
-                                "value": "power"
-                            },
-                            {
-                                "caption": "Water",
-                                "value": "water"
-                            },
-                            {
-                                "caption": "Camera",
-                                "value": "camera"
-                            },
-                            {
-                                "caption": "Music",
-                                "value": "music"
-                            },
-                            {
-                                "caption": "Car",
-                                "value": "car"
-                            },
-                            {
-                                "caption": "Garden",
-                                "value": "garden"
-                            },
-                            {
-                                "caption": "Alarm",
-                                "value": "alarm"
-                            },
-                            {
-                                "caption": "House",
-                                "value": "house"
-                            },
-                            {
-                                "caption": "Sun",
-                                "value": "sun"
-                            },
-                            {
-                                "caption": "Wind",
-                                "value": "wind"
-                            },
-                            {
-                                "caption": "Star",
-                                "value": "star"
-                            },
-                            {
-                                "caption": "Folder",
-                                "value": "folder"
-                            }
-                        ]
+                        "type": "SelectIcon",
+                        "caption": "Icon"
                     }
                 },
                 {

@@ -2,7 +2,7 @@
 
 [![IP-Symcon ab 8.2](https://img.shields.io/badge/IP--Symcon-ab_8.2-0b6fb3.svg)](https://www.symcon.de)
 [![Optimiert für Symcon 9.0](https://img.shields.io/badge/optimiert_f%C3%BCr-Symcon_9.0-0b6fb3.svg)](https://www.symcon.de/de/service/dokumentation/installation/migrationen/v81-v90-q1-2026/)
-[![Modul-Version 1.0 (Build 1)](https://img.shields.io/badge/Modul--Version-1.0_(Build_1)-informational.svg)](library.json)
+[![Modul-Version 1.1 (Build 2)](https://img.shields.io/badge/Modul--Version-1.1_(Build_2)-informational.svg)](library.json)
 [![Tests](https://github.com/cfaf2002/Shortcuts_Symcon/actions/workflows/tests.yml/badge.svg)](https://github.com/cfaf2002/Shortcuts_Symcon/actions/workflows/tests.yml)
 [![PHP 8.3 und 8.5](https://img.shields.io/badge/PHP-8.3_%7C_8.5-777bb4.svg?logo=php&logoColor=white)](https://www.php.net)
 [![SDK: IPSModuleStrict](https://img.shields.io/badge/SDK-IPSModuleStrict-success.svg)](https://www.symcon.de/de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/module/)
@@ -23,7 +23,8 @@ Eine Kachel mit frei konfigurierbaren Knöpfen, die direkt zu einer Variable, In
 ## Funktionsumfang
 
 - Beliebig viele Knöpfe, Reihenfolge im Formular verschiebbar.
-- Je Knopf: Objekt, Name (leer = Objektname), Symbol (20 Symbole oder automatisch nach Objekttyp), Farbe, Wert anzeigen.
+- Je Knopf: Objekt, Name (leer = Objektname), Symbol aus der Symbolauswahl von Symcon (leer = Symbol des Objekts), Farbe, Wert anzeigen.
+- Lädt ein Symbol in der Kachel nicht, erscheint ein eingebautes Ersatzsymbol nach Objekttyp.
 - Antippen öffnet das Objekt in der Visualisierung: Variablen und Instanzen als Vollbild-Kachel, Kategorien als Seite. Verknüpfungen werden auf ihr Ziel aufgelöst.
 - Werte von Variablen erscheinen formatiert im Knopf und werden bei jeder Änderung aktualisiert (nur geänderte Werte werden gesendet).
 - Darstellung als Raster oder Liste, optionale Überschrift.
@@ -83,6 +84,7 @@ php tests/stubs.php ../SymconStubs
 
 | Version | Build | Datum | Beschreibung |
 | :-- | --: | :-- | :-- |
+| 1.1 | 2 | 09.10.2026 | Symbole aus der Symbolauswahl von Symcon (leer = Symbol des Objekts); Knöpfe beginnen unter dem Kacheltitel statt ihn zu überdecken |
 | 1.0 | 1 | 09.10.2026 | Erste Version: Sprung-Knöpfe mit Symbol, Farbe und Wert, Raster oder Liste |
 
 ## Lizenz
